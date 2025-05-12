@@ -21,32 +21,34 @@ public class Pessoa {
     @Column(name = "id_pessoa")
     private Long idPessoa;
 
-    @Column
+    @Column(name = "name_completo", nullable = false)
     private String nomeCompleto;
 
     @Column(name = "data_nascimento")
     @Temporal(TemporalType.DATE)
     private Date dataNascimento;
 
-    @Column
+    @Column(name = "cpf_cnpj", nullable = false, unique = true)
     private String cpfcnpj;
 
-    @Column
+    @Column(nullable = false, unique = true)
+    private String rg;
+
+    @Column(nullable = false)
     private String telefone;
 
-    @Column
+    @Column(nullable = false)
     private String email;
 
-    @Column
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Tipo tipo;
 
-    @Column
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Atribuicao atrib;
 
     @Embedded
     private Endereco endereco;
 
-
-//    public boolean getEndereco() {
-//    }
 }
