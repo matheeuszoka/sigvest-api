@@ -31,7 +31,7 @@ public class Pessoa {
     @Column(name = "cpf_cnpj", nullable = false, unique = true)
     private String cpfcnpj;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 3)
     private String rg;
 
     @Column(nullable = false)
