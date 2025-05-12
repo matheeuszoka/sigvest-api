@@ -5,14 +5,12 @@ import br.com.sigvest.api.model.extras.Tipo;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Entidade que representa um Fornecedor no sistema.
- * Mapeia para a tabela 'fornecedor' no banco de dados.
- */
 @Entity
 @Table(name = "fornecedor")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Fornecedor {
 
     @Id
@@ -20,22 +18,23 @@ public class Fornecedor {
     @Column(name = "id_fornecedor")
     private Long idFornecedor;
 
-    @Column
+    @Column(nullable = false, name = "nome_fantasia")
     private String nomeFantasia;
 
-    @Column
+    @Column(nullable = false, name = "razao_social")
     private String razaoSocial;
 
-    @Column
+    @Column(unique = true, nullable = false, name = "cpf_cnpj")
     private String cpfcnpj;
 
-    @Column
+    @Column(nullable = false)
     private String telefone;
 
-    @Column
+    @Column(nullable = false)
     private String email;
 
-    @Column
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Tipo tipo;
 
     @Embedded
