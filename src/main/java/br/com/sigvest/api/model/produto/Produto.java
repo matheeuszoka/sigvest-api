@@ -35,7 +35,7 @@ public class Produto {
     @Enumerated(EnumType.STRING)
     private TipoRoupa tipoRoupa;
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "id_marca")
     private Marca marca;
 }
