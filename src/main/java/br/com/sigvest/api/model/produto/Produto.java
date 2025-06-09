@@ -1,6 +1,7 @@
 package br.com.sigvest.api.model.produto;
 
 import br.com.sigvest.api.model.extras.TipoRoupa;
+import br.com.sigvest.api.model.pessoa.Pessoa;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -38,4 +39,7 @@ public class Produto {
     @ManyToOne
     @JoinColumn(name = "id_marca")
     private Marca marca;
+
+
+
 }

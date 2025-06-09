@@ -2,6 +2,7 @@ package br.com.sigvest.api.model.fornecedor;
 
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.extras.Tipo;
+import br.com.sigvest.api.model.pessoa.Pessoa;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,4 +40,6 @@ public class Fornecedor {
 
     @Embedded
     private Endereco endereco;
+
+
 }

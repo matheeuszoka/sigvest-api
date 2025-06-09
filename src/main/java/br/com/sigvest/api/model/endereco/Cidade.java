@@ -21,7 +21,7 @@ public class Cidade {
     @Column
     private String nomeCidade;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "id_estado", nullable = false)
     private Estado estado;
 

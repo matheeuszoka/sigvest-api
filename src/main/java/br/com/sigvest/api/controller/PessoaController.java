@@ -3,11 +3,13 @@ package br.com.sigvest.api.controller;
 import br.com.sigvest.api.model.pessoa.Pessoa;
 import br.com.sigvest.api.service.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("pessoa")
@@ -22,7 +24,7 @@ public class PessoaController {
     }
 
     @PostMapping
-    public Pessoa setUsuario(@RequestBody Pessoa pessoa) {
+    public Pessoa setPessoa(@RequestBody Pessoa pessoa) {
         return pessoaService.salvar(pessoa);
     }
 
@@ -35,17 +37,25 @@ public class PessoaController {
     public ResponseEntity<String> deletar(@PathVariable Long id) {
         boolean deletado = pessoaService.deletar(id);
         if (deletado) {
-            return ResponseEntity.ok("Usuário deletado com sucesso.");
+            return ResponseEntity.ok("Pessoa deletado com sucesso.");
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pessoa não encontrado.");
         }
     }
 
-    @PutMapping("/atualizarPessoa/{id}")
-    public ResponseEntity<Pessoa>atualizarPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa){
+    @GetMapping("/atrib/fornecedor")
+    public List<Pessoa> buscarAtrib( ){
+        return pessoaService.buscarAtrib();
+    }
+
+    @PutMapping("/{id}")  // Em vez de "/atualizarPessoa/{id}"
+    public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa){
         Pessoa pessoaUp = pessoaService.atualizarPessoa(id, pessoa);
         return ResponseEntity.ok(pessoaUp);
     }
-
+    @GetMapping("/{id}")
+    public Optional<Pessoa> buscarPorId(@PathVariable Long id) {
+        return pessoaService.buscarPorId(id);
+    }
 
 }

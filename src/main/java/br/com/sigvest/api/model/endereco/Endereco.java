@@ -12,10 +12,7 @@ import lombok.*;
 @Setter
 public class Endereco {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "id_endereco")
-//    private Long idEndereco;
+
 
     @Column
     private String logradouro;
@@ -32,7 +29,7 @@ public class Endereco {
     @Column(name = "cep")
     private String cep;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_cidade", nullable = false)
     private Cidade cidade;
 
