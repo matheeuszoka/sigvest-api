@@ -3,6 +3,7 @@ package br.com.sigvest.api.service;
 import br.com.sigvest.api.model.produto.Marca;
 import br.com.sigvest.api.model.produto.Produto;
 import br.com.sigvest.api.repository.ProdutoRepository;
+import br.com.sigvest.api.repository.MarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,11 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    public Produto salvar(Produto produto){
+    public Produto salvarProduto(Produto produto) {
+        if (produto.getMarca() == null) {
+            throw new IllegalArgumentException("Marca é obrigatória");
+        }
+        // Salvar o produto no banco de dados
         return produtoRepository.save(produto);
     }
 
@@ -35,18 +40,25 @@ public class ProdutoService {
 
     public Produto atualizarProduto(Long id, Produto produtoAtualizado) {
         Produto produtoExistente = produtoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
 
         produtoExistente.setNome(produtoAtualizado.getNome());
         produtoExistente.setCodigo(produtoAtualizado.getCodigo());
         produtoExistente.setEstoque(produtoAtualizado.getEstoque());
         produtoExistente.setPrecoCusto(produtoAtualizado.getPrecoCusto());
         produtoExistente.setPrecoVenda(produtoAtualizado.getPrecoVenda());
-        produtoExistente.setMarca(produtoAtualizado.getMarca());
         produtoExistente.setTamanho(produtoAtualizado.getTamanho());
         produtoExistente.setTipoRoupa(produtoAtualizado.getTipoRoupa());
 
+        // Se uma marca foi informada, criar apenas a referência com o ID
+        if (produtoAtualizado.getMarca() != null && produtoAtualizado.getMarca().getIdMarca() != null) {
+            Marca marcaRef = new Marca();
+            marcaRef.setIdMarca(produtoAtualizado.getMarca().getIdMarca());
+            produtoExistente.setMarca(marcaRef);
+        } else {
+            produtoExistente.setMarca(null);
+        }
+
         return produtoRepository.save(produtoExistente);
     }
-
 }

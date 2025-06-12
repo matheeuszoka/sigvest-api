@@ -40,7 +40,17 @@ public class MarcaService {
                 .orElseThrow(() -> new IllegalArgumentException("marca não encontrada"));
 
         marcaExistente.setMarca(marcaAtualizado.getMarca());
+        marcaExistente.setDesMarca(marcaAtualizado.getDesMarca());
+        marcaExistente.setStatus(marcaAtualizado.getStatus());
         return marcaRepository.save(marcaExistente);
     }
+    public Optional<Marca> buscarPorId(Long id) {
+        return marcaRepository.findById(id);
+    }
+
+    public List<Marca> buscarLikeMarca(String marca) {
+        return marcaRepository.buscarLikeMarca(marca);
+    }
+
 
 }

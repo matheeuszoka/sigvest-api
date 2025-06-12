@@ -22,7 +22,7 @@ public class ProdutoController {
     }
     @PostMapping
     public Produto setProduto(@RequestBody Produto produto) {
-        return produtoService.salvar(produto);
+        return produtoService.salvarProduto(produto);
     }
 
     @PutMapping("/{id}")

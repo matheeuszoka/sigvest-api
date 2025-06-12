@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("marca")
@@ -42,5 +43,14 @@ public class MarcaController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Marca não encontrado.");
         }
+    }
+    @GetMapping("/{id}")
+    public Optional<Marca> buscarPorId(@PathVariable Long id) {
+        return marcaService.buscarPorId(id);
+    }
+
+    @GetMapping("/likemarca/{marca}")
+    public List<Marca> buscarLikeMarca(@PathVariable String marca){
+        return marcaService.buscarLikeMarca(marca);
     }
 }
