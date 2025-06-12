@@ -61,16 +61,23 @@ public class PessoaService {
         pessoa.getEndereco().getCidade().setEstado(estadoComId);
 
         return pessoaRepository.save(pessoa);
-    }    public List<Pessoa> listar(){
+    }
+
+    public List<Pessoa> listar() {
         return pessoaRepository.findAll();
     }
 
-    public List<Pessoa> buscarLikeNome(String nomeCompleto){
+    public List<Pessoa> buscarLikeNome(String nomeCompleto) {
         return pessoaRepository.buscarLikeNome(nomeCompleto);
     }
 
-    public List<Pessoa> buscarAtrib(){
-        return pessoaRepository.buscarAtrib();
+    public List<Pessoa> buscarAtribFunc() {
+        return pessoaRepository.buscarAtribFunc();
+    }
+
+
+    public List<Pessoa> buscarAtribCli() {
+        return pessoaRepository.buscarAtribCli();
     }
 
     public boolean deletar(Long id) {
@@ -82,7 +89,8 @@ public class PessoaService {
             return false;
         }
     }
-    public  Pessoa atualizarPessoa(Long id, Pessoa pessoaAtualizado) {
+
+    public Pessoa atualizarPessoa(Long id, Pessoa pessoaAtualizado) {
         Pessoa pessoaExistente = pessoaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada"));
 

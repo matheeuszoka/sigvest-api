@@ -12,8 +12,10 @@ public interface PessoaRepository extends JpaRepository<Pessoa,Long> {
     @Query(value = "select * from pessoa where name_completo like %:nomeCompleto%", nativeQuery = true)
     List<Pessoa> buscarLikeNome(@Param("nomeCompleto") String nomeCompleto);
 
-    @Query(value = "SELECT * FROM pessoa WHERE atrib = 'FORNECEDOR'", nativeQuery = true)
-    List<Pessoa> buscarAtrib();
+    @Query(value = "SELECT * FROM pessoa WHERE atrib = 'FUNCIONARIO'", nativeQuery = true)
+    List<Pessoa> buscarAtribFunc();
 
+    @Query(value = "SELECT * FROM pessoa WHERE atrib = 'CLIENTE'", nativeQuery = true)
+    List<Pessoa> buscarAtribCli();
 }
 

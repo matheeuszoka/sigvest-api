@@ -3,9 +3,15 @@ package br.com.sigvest.api.model.produto;
 import br.com.sigvest.api.model.extras.TipoRoupa;
 import br.com.sigvest.api.model.pessoa.Pessoa;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
+@Data
+@AllArgsConstructor
+@Entity
+@Table(name = "produto")
 public class Produto {
 
 
