@@ -1,5 +1,6 @@
 package br.com.sigvest.api.service;
 
+import br.com.sigvest.api.model.pessoa.Pessoa;
 import br.com.sigvest.api.model.produto.Marca;
 import br.com.sigvest.api.model.produto.Produto;
 import br.com.sigvest.api.repository.ProdutoRepository;
@@ -61,4 +62,15 @@ public class ProdutoService {
 
         return produtoRepository.save(produtoExistente);
     }
+
+    // Método adicionado para buscar produto por ID
+    public Optional<Produto> buscarPorId(Long id) {
+        return produtoRepository.findById(id);
+    }
+
+
+    // Método adicionado para buscar produtos por nome (você precisa implementar no repository)
+//    public List<Produto> buscarLikeNome(String nome) {
+//        return produtoRepository.buscarLikeNome(nome);
+//    }
 }
