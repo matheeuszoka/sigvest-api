@@ -1,7 +1,9 @@
 package br.com.sigvest.api.service;
 
+import br.com.sigvest.api.model.endereco.Cidade;
 import br.com.sigvest.api.model.endereco.Estado;
 import br.com.sigvest.api.model.pessoa.Pessoa;
+import br.com.sigvest.api.repository.CidadeRepository;
 import br.com.sigvest.api.repository.EstadoRepository;
 import br.com.sigvest.api.repository.PessoaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ public class PessoaService {
     private PessoaRepository pessoaRepository;
     @Autowired
     private EstadoRepository estadoRepository;
+    @Autowired
+    private CidadeRepository cidadeRepository;
 
     public Pessoa salvar(Pessoa pessoa) {
         // Validação básica da pessoa
@@ -34,12 +38,21 @@ public class PessoaService {
             throw new IllegalArgumentException("Cidade não pode ser nula");
         }
 
-        // Validação do estado
+        // Validação do estado (deve vir antes da cidade)
         if (pessoa.getEndereco().getCidade().getEstado() == null) {
             throw new IllegalArgumentException("Estado não pode ser nulo");
         }
 
+        // Processar estado primeiro
         Estado estadoRecebido = pessoa.getEndereco().getCidade().getEstado();
+
+        // Validação adicional do estado
+        if (estadoRecebido.getUf() == null || estadoRecebido.getUf().trim().isEmpty()) {
+            throw new IllegalArgumentException("UF do estado não pode ser nula ou vazia");
+        }
+        if (estadoRecebido.getNomeEstado() == null || estadoRecebido.getNomeEstado().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome do estado não pode ser nulo ou vazio");
+        }
 
         // Verificar se o estado já existe no banco pela UF e nome (case insensitive)
         Optional<Estado> estadoExistente = estadoRepository.findByUfOrNomeEstadoIgnoreCase(
@@ -54,11 +67,32 @@ public class PessoaService {
         } else {
             // Estado não existe - salva no banco e obtém o ID gerado
             estadoComId = estadoRepository.save(estadoRecebido);
-            pessoa.getEndereco().getCep();
         }
 
-        // Atualiza o estado na cidade com o estado que tem ID válido (existente ou novo salvo)
-        pessoa.getEndereco().getCidade().setEstado(estadoComId);
+        // Processar cidade depois do estado
+        Cidade cidadeRecebida = pessoa.getEndereco().getCidade();
+
+        // Validação adicional da cidade
+        if (cidadeRecebida.getNomeCidade() == null || cidadeRecebida.getNomeCidade().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome da cidade não pode ser nulo ou vazio");
+        }
+
+        // Atualizar o estado na cidade recebida antes de buscar/salvar
+        cidadeRecebida.setEstado(estadoComId);
+
+        Optional<Cidade> cidadeExistente = cidadeRepository.findByCidade(
+                cidadeRecebida.getNomeCidade()
+        );
+
+        Cidade cidadeComId;
+        if (cidadeExistente.isPresent()) {
+            cidadeComId = cidadeExistente.get();
+        } else {
+            cidadeComId = cidadeRepository.save(cidadeRecebida);
+        }
+
+        // Atualizar o endereço com a cidade que tem ID válido
+        pessoa.getEndereco().setCidade(cidadeComId);
 
         return pessoaRepository.save(pessoa);
     }
@@ -74,7 +108,6 @@ public class PessoaService {
     public List<Pessoa> buscarAtribFunc() {
         return pessoaRepository.buscarAtribFunc();
     }
-
 
     public List<Pessoa> buscarAtribCli() {
         return pessoaRepository.buscarAtribCli();
@@ -110,6 +143,4 @@ public class PessoaService {
     public Optional<Pessoa> buscarPorId(Long id) {
         return pessoaRepository.findById(id);
     }
-
 }
-
