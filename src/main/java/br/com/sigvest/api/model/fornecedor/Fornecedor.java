@@ -2,7 +2,6 @@ package br.com.sigvest.api.model.fornecedor;
 
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.extras.Tipo;
-import br.com.sigvest.api.model.pessoa.Pessoa;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,8 +24,11 @@ public class Fornecedor {
     @Column(nullable = false, name = "razao_social")
     private String razaoSocial;
 
-    @Column(unique = true, nullable = false, name = "cpf_cnpj")
-    private String cpfcnpj;
+    @Column(nullable = false, name = "inscricao_estadual")
+    private String inscricaoEstadual;
+
+    @Column(unique = true, nullable = false, name = "cnpj")
+    private String cnpjFornecedor;
 
     @Column(nullable = false)
     private String telefone;
@@ -34,11 +36,8 @@ public class Fornecedor {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Tipo tipo;
-
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "idEndereco", referencedColumnName = "idEndereco")
     private Endereco endereco;
 
 
