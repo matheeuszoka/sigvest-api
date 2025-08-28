@@ -1,18 +1,21 @@
 package br.com.sigvest.api.model.endereco;
 
-import br.com.sigvest.api.model.fornecedor.Fornecedor;
-import br.com.sigvest.api.model.pessoa.Pessoa;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-//@Entity
-//@Table(name = "endereco")
-@Embeddable
+@Entity
+@Table(name = "endereco")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Endereco {
 
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idEndereco;
 
     @Column
     private String logradouro;
@@ -29,7 +32,7 @@ public class Endereco {
     @Column(name = "cep")
     private String cep;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "id_cidade", nullable = false)
     private Cidade cidade;
 

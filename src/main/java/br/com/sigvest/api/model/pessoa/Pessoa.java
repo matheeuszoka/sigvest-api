@@ -6,7 +6,6 @@ import br.com.sigvest.api.model.extras.Tipo;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -48,7 +47,8 @@ public class Pessoa {
     @Enumerated(EnumType.STRING)
     private Atribuicao atrib;
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "idEndereco", referencedColumnName = "idEndereco")
     private Endereco endereco;
 
 }

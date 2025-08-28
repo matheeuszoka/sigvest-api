@@ -1,11 +1,14 @@
 package br.com.sigvest.api.controller;
 
+import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.pessoa.Pessoa;
+import br.com.sigvest.api.service.EnderecoHierarquiaService;
 import br.com.sigvest.api.service.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,18 +21,33 @@ public class PessoaController {
     @Autowired
     private PessoaService pessoaService;
 
+    @Autowired
+    private EnderecoHierarquiaService enderecoHierarquiaService;
+
     @GetMapping
     public List<Pessoa> listar() {
         return pessoaService.listar();
     }
 
     @PostMapping
-    public Pessoa setPessoa(@RequestBody Pessoa pessoa) {
-        return pessoaService.salvar(pessoa);
+    @Transactional
+    public ResponseEntity<Pessoa>criarPessoa(@RequestBody Pessoa pessoa) {
+        try {
+            if (pessoa.getEndereco() != null) {
+                Endereco enderecoProcessado = enderecoHierarquiaService.processarHierarquiaEndereco(pessoa.getEndereco());
+                pessoa.setEndereco(enderecoProcessado);
+            }
+            Pessoa pessoaSalvo = pessoaService.salvar(pessoa);
+            return ResponseEntity.ok(pessoaSalvo);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/likenome/{nomeCompleto}")
-    public List<Pessoa> buscarLikeNome(@PathVariable String nomeCompleto){
+    public List<Pessoa> buscarLikeNome(@PathVariable String nomeCompleto) {
         return pessoaService.buscarLikeNome(nomeCompleto);
     }
 
@@ -44,21 +62,22 @@ public class PessoaController {
     }
 
     @GetMapping("/atrib/funcionario")
-    public List<Pessoa> buscarAtribFunc( ){
+    public List<Pessoa> buscarAtribFunc() {
         return pessoaService.buscarAtribFunc();
     }
 
 
     @GetMapping("/atrib/cliente")
-    public List<Pessoa> buscarAtribCli( ){
+    public List<Pessoa> buscarAtribCli() {
         return pessoaService.buscarAtribCli();
     }
 
     @PutMapping("/{id}")  // Em vez de "/atualizarPessoa/{id}"
-    public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa){
+    public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa) {
         Pessoa pessoaUp = pessoaService.atualizarPessoa(id, pessoa);
         return ResponseEntity.ok(pessoaUp);
     }
+
     @GetMapping("/{id}")
     public Optional<Pessoa> buscarPorId(@PathVariable Long id) {
         return pessoaService.buscarPorId(id);
