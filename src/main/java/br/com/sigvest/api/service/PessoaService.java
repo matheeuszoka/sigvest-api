@@ -1,6 +1,7 @@
 package br.com.sigvest.api.service;
 
 import br.com.sigvest.api.model.endereco.Cidade;
+import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.endereco.Estado;
 import br.com.sigvest.api.model.pessoa.Pessoa;
 import br.com.sigvest.api.repository.CidadeRepository;
@@ -21,6 +22,9 @@ public class PessoaService {
     private EstadoRepository estadoRepository;
     @Autowired
     private CidadeRepository cidadeRepository;
+
+    @Autowired
+    private EnderecoHierarquiaService enderecoHierarquiaService;
 
     public Pessoa salvar(Pessoa pessoa) {
         // Validação básica da pessoa
@@ -123,22 +127,113 @@ public class PessoaService {
         }
     }
 
-    public Pessoa atualizarPessoa(Long id, Pessoa pessoaAtualizado) {
+    public Pessoa atualizarPessoa(Long id, Pessoa pessoaAtualizada) {
+        // 1. Buscar pessoa existente
         Pessoa pessoaExistente = pessoaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pessoa não encontrada"));
 
-        pessoaExistente.setNomeCompleto(pessoaAtualizado.getNomeCompleto());
-        pessoaExistente.setDataNascimento(pessoaAtualizado.getDataNascimento());
-        pessoaExistente.setCpfcnpj(pessoaAtualizado.getCpfcnpj());
-        pessoaExistente.setRg(pessoaAtualizado.getRg());
-        pessoaExistente.setTelefone(pessoaAtualizado.getTelefone());
-        pessoaExistente.setEmail(pessoaAtualizado.getEmail());
-        pessoaExistente.setTipo(pessoaAtualizado.getTipo());
-        pessoaExistente.setAtrib(pessoaAtualizado.getAtrib());
-        pessoaExistente.setEndereco(pessoaAtualizado.getEndereco());
+        // 2. Atualizar campos básicos
+        atualizarCamposBasicos(pessoaExistente, pessoaAtualizada);
+
+        // 3. Processar endereco se fornecido
+        if (pessoaAtualizada.getEndereco() != null) {
+            Endereco enderecoProcessado = processarEnderecoParaAtualizacao(
+                    pessoaExistente.getEndereco(),
+                    pessoaAtualizada.getEndereco()
+            );
+            pessoaExistente.setEndereco(enderecoProcessado);
+        }
 
         return pessoaRepository.save(pessoaExistente);
     }
+
+    private void atualizarCamposBasicos(Pessoa existente, Pessoa atualizada) {
+        if (atualizada.getNomeCompleto() != null) {
+            existente.setNomeCompleto(atualizada.getNomeCompleto());
+        }
+        if (atualizada.getDataNascimento() != null) {
+            existente.setDataNascimento(atualizada.getDataNascimento());
+        }
+        if (atualizada.getCpfcnpj() != null) {
+            existente.setCpfcnpj(atualizada.getCpfcnpj());
+        }
+        if (atualizada.getRg() != null) {
+            existente.setRg(atualizada.getRg());
+        }
+        if (atualizada.getTelefone() != null) {
+            existente.setTelefone(atualizada.getTelefone());
+        }
+        if (atualizada.getEmail() != null) {
+            existente.setEmail(atualizada.getEmail());
+        }
+        if (atualizada.getTipo() != null) {
+            existente.setTipo(atualizada.getTipo());
+        }
+        if (atualizada.getAtrib() != null) {
+            existente.setAtrib(atualizada.getAtrib());
+        }
+    }
+
+    private Endereco processarEnderecoParaAtualizacao(Endereco enderecoExistente, Endereco novoEndereco) {
+        try {
+            // Validar estrutura do novo endereco
+            validarEstruturaEndereco(novoEndereco);
+
+            // Processar hierarquia (Estado -> Cidade -> Endereco)
+            Endereco enderecoProcessado = enderecoHierarquiaService.processarHierarquiaEndereco(novoEndereco);
+
+            // Se havia endereco anterior, manter o ID para UPDATE ao invés de INSERT
+            if (enderecoExistente != null && enderecoExistente.getIdEndereco() != null) {
+                enderecoProcessado.setIdEndereco(enderecoExistente.getIdEndereco());
+            }
+
+            return enderecoProcessado;
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Erro ao processar endereço: " + e.getMessage());
+        }
+    }
+
+    private void validarEstruturaEndereco(Endereco endereco) {
+        if (endereco == null) {
+            throw new IllegalArgumentException("Endereço não pode ser nulo");
+        }
+
+        // Validar campos obrigatórios do endereco
+        if (endereco.getLogradouro() == null || endereco.getLogradouro().trim().isEmpty()) {
+            throw new IllegalArgumentException("Logradouro é obrigatório");
+        }
+
+        if (endereco.getCep() == null || endereco.getCep().trim().isEmpty()) {
+            throw new IllegalArgumentException("CEP é obrigatório");
+        }
+
+        // Validar cidade
+        if (endereco.getCidade() == null) {
+            throw new IllegalArgumentException("Cidade é obrigatória");
+        }
+
+        if (endereco.getCidade().getNomeCidade() == null ||
+                endereco.getCidade().getNomeCidade().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome da cidade é obrigatório");
+        }
+
+        // Validar estado
+        if (endereco.getCidade().getEstado() == null) {
+            throw new IllegalArgumentException("Estado é obrigatório");
+        }
+
+        if (endereco.getCidade().getEstado().getUf() == null ||
+                endereco.getCidade().getEstado().getUf().trim().isEmpty()) {
+            throw new IllegalArgumentException("UF é obrigatória");
+        }
+
+        if (endereco.getCidade().getEstado().getNomeEstado() == null ||
+                endereco.getCidade().getEstado().getNomeEstado().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome do estado é obrigatório");
+        }
+    }
+
 
     public Optional<Pessoa> buscarPorId(Long id) {
         return pessoaRepository.findById(id);

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -31,7 +32,7 @@ public class PessoaController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<Pessoa>criarPessoa(@RequestBody Pessoa pessoa) {
+    public ResponseEntity<Pessoa> criarPessoa(@RequestBody Pessoa pessoa) {
         try {
             if (pessoa.getEndereco() != null) {
                 Endereco enderecoProcessado = enderecoHierarquiaService.processarHierarquiaEndereco(pessoa.getEndereco());
@@ -39,9 +40,9 @@ public class PessoaController {
             }
             Pessoa pessoaSalvo = pessoaService.salvar(pessoa);
             return ResponseEntity.ok(pessoaSalvo);
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -72,11 +73,25 @@ public class PessoaController {
         return pessoaService.buscarAtribCli();
     }
 
-    @PutMapping("/{id}")  // Em vez de "/atualizarPessoa/{id}"
-    public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa) {
-        Pessoa pessoaUp = pessoaService.atualizarPessoa(id, pessoa);
-        return ResponseEntity.ok(pessoaUp);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizarPessoa(
+            @PathVariable Long id,
+            @RequestBody Pessoa pessoaAtualizada) {
+
+        try {
+            Pessoa pessoaAtualizadaResult = pessoaService.atualizarPessoa(id, pessoaAtualizada);
+            return ResponseEntity.ok(pessoaAtualizadaResult);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("erro", e.getMessage()));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("erro", "Erro interno do servidor"));
+        }
     }
+
 
     @GetMapping("/{id}")
     public Optional<Pessoa> buscarPorId(@PathVariable Long id) {

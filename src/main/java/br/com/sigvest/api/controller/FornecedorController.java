@@ -26,14 +26,12 @@ public class FornecedorController {
     @Transactional
     public ResponseEntity<Fornecedor> criarFornecedor(@RequestBody Fornecedor fornecedor) {
         try {
-            // 1. Processar hierarquia de endereco primeiro
             if (fornecedor.getEndereco() != null) {
                 Endereco enderecoProcessado = enderecoHierarquiaService
                         .processarHierarquiaEndereco(fornecedor.getEndereco());
                 fornecedor.setEndereco(enderecoProcessado);
             }
 
-            // 2. Salvar fornecedor
             Fornecedor fornecedorSalvo = fornecedorService.salvar(fornecedor);
 
             return ResponseEntity.ok(fornecedorSalvo);
@@ -44,4 +42,6 @@ public class FornecedorController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
 }
