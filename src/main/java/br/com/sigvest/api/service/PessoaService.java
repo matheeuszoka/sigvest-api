@@ -4,9 +4,10 @@ import br.com.sigvest.api.model.endereco.Cidade;
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.endereco.Estado;
 import br.com.sigvest.api.model.pessoa.Pessoa;
-import br.com.sigvest.api.repository.CidadeRepository;
-import br.com.sigvest.api.repository.EstadoRepository;
+import br.com.sigvest.api.repository.EnderecoRepository.CidadeRepository;
+import br.com.sigvest.api.repository.EnderecoRepository.EstadoRepository;
 import br.com.sigvest.api.repository.PessoaRepository;
+import br.com.sigvest.api.service.EnderecoService.EnderecoHierarquiaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

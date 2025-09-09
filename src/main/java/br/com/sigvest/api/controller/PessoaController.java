@@ -2,10 +2,9 @@ package br.com.sigvest.api.controller;
 
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.pessoa.Pessoa;
-import br.com.sigvest.api.service.EnderecoHierarquiaService;
+import br.com.sigvest.api.service.EnderecoService.EnderecoHierarquiaService;
 import br.com.sigvest.api.service.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;

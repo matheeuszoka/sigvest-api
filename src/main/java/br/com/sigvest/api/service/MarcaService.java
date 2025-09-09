@@ -1,7 +1,7 @@
 package br.com.sigvest.api.service;
 
 import br.com.sigvest.api.model.produto.Roupa.Marca;
-import br.com.sigvest.api.repository.MarcaRepository;
+import br.com.sigvest.api.repository.RoupaSKURepository.MarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

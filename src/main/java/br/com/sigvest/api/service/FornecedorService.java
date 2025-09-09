@@ -5,6 +5,9 @@ import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.endereco.Estado;
 import br.com.sigvest.api.model.fornecedor.Fornecedor;
 import br.com.sigvest.api.repository.FornecedorRepository;
+import br.com.sigvest.api.service.EnderecoService.CidadeService;
+import br.com.sigvest.api.service.EnderecoService.EnderecoHierarquiaService;
+import br.com.sigvest.api.service.EnderecoService.EstadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -2,9 +2,7 @@ package br.com.sigvest.api.controller;
 
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.fornecedor.Fornecedor;
-import br.com.sigvest.api.model.pessoa.Pessoa;
-import br.com.sigvest.api.model.produto.Produto;
-import br.com.sigvest.api.service.EnderecoHierarquiaService;
+import br.com.sigvest.api.service.EnderecoService.EnderecoHierarquiaService;
 import br.com.sigvest.api.service.FornecedorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
