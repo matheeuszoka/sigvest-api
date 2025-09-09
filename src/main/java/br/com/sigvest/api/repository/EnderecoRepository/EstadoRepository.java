@@ -1,4 +1,4 @@
-package br.com.sigvest.api.repository;
+package br.com.sigvest.api.repository.EnderecoRepository;
 
 import br.com.sigvest.api.model.endereco.Estado;
 import org.springframework.data.jpa.repository.JpaRepository;

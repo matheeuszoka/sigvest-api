@@ -1,9 +1,9 @@
-package br.com.sigvest.api.service;
+package br.com.sigvest.api.service.EnderecoService;
 
 import br.com.sigvest.api.model.endereco.Cidade;
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.endereco.Estado;
-import br.com.sigvest.api.repository.EnderecoRepository;
+import br.com.sigvest.api.repository.EnderecoRepository.EnderecoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

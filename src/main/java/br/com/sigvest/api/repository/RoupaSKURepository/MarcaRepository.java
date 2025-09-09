@@ -1,4 +1,4 @@
-package br.com.sigvest.api.repository;
+package br.com.sigvest.api.repository.RoupaSKURepository;
 
 import br.com.sigvest.api.model.produto.Roupa.Marca;
 import org.springframework.data.jpa.repository.JpaRepository;
