@@ -1,10 +1,8 @@
 package br.com.sigvest.api.service;
 
-import br.com.sigvest.api.model.pessoa.Pessoa;
-import br.com.sigvest.api.model.produto.Marca;
+import br.com.sigvest.api.model.produto.Roupa.Marca;
 import br.com.sigvest.api.model.produto.Produto;
 import br.com.sigvest.api.repository.ProdutoRepository;
-import br.com.sigvest.api.repository.MarcaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,13 +41,8 @@ public class ProdutoService {
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
 
-        produtoExistente.setNome(produtoAtualizado.getNome());
-        produtoExistente.setCodigo(produtoAtualizado.getCodigo());
-        produtoExistente.setEstoque(produtoAtualizado.getEstoque());
-        produtoExistente.setPrecoCusto(produtoAtualizado.getPrecoCusto());
-        produtoExistente.setPrecoVenda(produtoAtualizado.getPrecoVenda());
-        produtoExistente.setTamanho(produtoAtualizado.getTamanho());
-        produtoExistente.setTipoRoupa(produtoAtualizado.getTipoRoupa());
+        produtoExistente.setNomeProduto(produtoAtualizado.getNomeProduto());
+
 
         // Se uma marca foi informada, criar apenas a referência com o ID
         if (produtoAtualizado.getMarca() != null && produtoAtualizado.getMarca().getIdMarca() != null) {
@@ -69,8 +62,7 @@ public class ProdutoService {
     }
 
 
-    // Método adicionado para buscar produtos por nome (você precisa implementar no repository)
-//    public List<Produto> buscarLikeNome(String nome) {
-//        return produtoRepository.buscarLikeNome(nome);
-//    }
+    public List<Produto> buscarProdutos(String termo) {
+        return produtoRepository.buscarProdutos(termo);
+    }
 }

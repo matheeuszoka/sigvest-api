@@ -1,8 +1,6 @@
 package br.com.sigvest.api.controller;
 
-import br.com.sigvest.api.model.endereco.Estado;
-import br.com.sigvest.api.model.pessoa.Pessoa;
-import br.com.sigvest.api.model.produto.Marca;
+import br.com.sigvest.api.model.produto.Roupa.Marca;
 import br.com.sigvest.api.service.MarcaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

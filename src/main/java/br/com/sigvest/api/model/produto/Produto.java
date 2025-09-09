@@ -1,7 +1,6 @@
 package br.com.sigvest.api.model.produto;
 
-import br.com.sigvest.api.model.extras.TipoRoupa;
-import br.com.sigvest.api.model.pessoa.Pessoa;
+import br.com.sigvest.api.model.produto.Roupa.Marca;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,31 +22,14 @@ public class Produto {
     private Long idProduto;
 
     @Column(nullable = false)
-    private String nome;
-
-    @Column(nullable = false,unique = true)
-    private String codigo;
-
-    @Column(name = "preco_custo", nullable = false)
-    private BigDecimal precoCusto;
-
-    @Column(name = "preco_venda", nullable = false)
-    private BigDecimal precoVenda;
-
-    @Column(nullable = false)
-    private Integer estoque;
-
-    @Column(nullable = false)
-    private String tamanho;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TipoRoupa tipoRoupa;
+    private String nomeProduto;
 
     @ManyToOne
     @JoinColumn(name = "id_marca")
     private Marca marca;
 
-
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_derivacao", nullable = false)
+    private Derivacao derivacao;
 
 }

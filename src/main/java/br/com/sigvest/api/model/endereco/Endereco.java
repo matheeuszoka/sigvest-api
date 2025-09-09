@@ -32,7 +32,7 @@ public class Endereco {
     @Column(name = "cep")
     private String cep;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "id_cidade", nullable = false)
     private Cidade cidade;
 

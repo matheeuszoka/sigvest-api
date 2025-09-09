@@ -1,6 +1,5 @@
 package br.com.sigvest.api.controller;
 
-import br.com.sigvest.api.model.produto.Marca;
 import br.com.sigvest.api.model.produto.Produto;
 import br.com.sigvest.api.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @RequestBody Produto produto){
+    public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @RequestBody Produto produto) {
         Produto produtoUp = produtoService.atualizarProduto(id, produto);
         return ResponseEntity.ok(produtoUp);
     }
@@ -50,9 +49,13 @@ public class ProdutoController {
         return produtoService.buscarPorId(id);
     }
 
-    // Endpoint para buscar produtos por nome (assumindo que você tem esse método no service)
-//    @GetMapping("/likeproduto/{nome}")
-//    public List<Produto> buscarLikeNome(@PathVariable String nome){
-//        return produtoService.buscarLikeNome(nome);
-//    }
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Produto>> buscarProdutos(@RequestParam String termo) {
+        try {
+            List<Produto> produtos = produtoService.buscarProdutos(termo);
+            return ResponseEntity.ok(produtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

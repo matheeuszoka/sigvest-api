@@ -11,8 +11,8 @@ public enum TipoRoupa {
     TIPO_VESTIDO("tipo_vestido"),
     TIPO_MOLETOM("tipo_moletom"),
     TIPO_CASACO("tipo_casaco"),
-    TIPO_REGATA("tipo_regata");
-
+    TIPO_REGATA("tipo_regata"),
+    TIPO_OUTROS("tipo_outros");
 
     private String tipoRoupa;
 
