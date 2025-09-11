@@ -1,7 +1,7 @@
 package br.com.sigvest.api.controller;
 
 import br.com.sigvest.api.model.produto.Roupa.Marca;
-import br.com.sigvest.api.service.MarcaService;
+import br.com.sigvest.api.service.RoupaSKUService.MarcaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

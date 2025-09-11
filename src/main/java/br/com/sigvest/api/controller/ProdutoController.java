@@ -17,20 +17,32 @@ public class ProdutoController {
     @Autowired
     private ProdutoService produtoService;
 
+    @PostMapping
+    public ResponseEntity<?> salvar(@RequestBody Produto produto) {
+        try {
+            return ResponseEntity.ok(produtoService.salvarProduto(produto));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     @GetMapping
     public List<Produto> listar() {
         return produtoService.listar();
     }
 
-    @PostMapping
-    public Produto setProduto(@RequestBody Produto produto) {
-        return produtoService.salvarProduto(produto);
+
+    @GetMapping("/sku/{sku}")
+    public ResponseEntity<Produto> buscarPorSKU(@PathVariable String sku) {
+        Optional<Produto> produto = produtoService.buscarPorSKU(sku);
+        return produto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @RequestBody Produto produto) {
-        Produto produtoUp = produtoService.atualizarProduto(id, produto);
-        return ResponseEntity.ok(produtoUp);
+
+
+    @GetMapping("/{id}")
+    public Optional<Produto> buscarPorId(@PathVariable Long id) {
+        return produtoService.buscarPorId(id);
     }
 
     @DeleteMapping("/{id}")
@@ -40,22 +52,6 @@ public class ProdutoController {
             return ResponseEntity.ok("Produto deletado com sucesso.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado.");
-        }
-    }
-
-    // Endpoint adicionado para buscar produto por ID
-    @GetMapping("/{id}")
-    public Optional<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id);
-    }
-
-    @GetMapping("/buscar")
-    public ResponseEntity<List<Produto>> buscarProdutos(@RequestParam String termo) {
-        try {
-            List<Produto> produtos = produtoService.buscarProdutos(termo);
-            return ResponseEntity.ok(produtos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

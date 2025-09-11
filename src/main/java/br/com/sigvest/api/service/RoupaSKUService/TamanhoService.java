@@ -45,4 +45,13 @@ public class TamanhoService {
         return tamanhoRepository.findById(id);
     }
 
+    public Tamanho buscarOuCriar(String nomeTamanho) {
+        return tamanhoRepository.findByNomeTamanho(nomeTamanho)
+                .orElseGet(() -> {
+                    Tamanho novoTamanho = new Tamanho();
+                    novoTamanho.setNomeTamanho(nomeTamanho);
+                    return tamanhoRepository.save(novoTamanho);
+                });
+    }
+
 }

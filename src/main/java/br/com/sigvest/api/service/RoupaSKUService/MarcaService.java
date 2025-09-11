@@ -1,4 +1,4 @@
-package br.com.sigvest.api.service;
+package br.com.sigvest.api.service.RoupaSKUService;
 
 import br.com.sigvest.api.model.produto.Roupa.Marca;
 import br.com.sigvest.api.repository.RoupaSKURepository.MarcaRepository;
@@ -50,5 +50,13 @@ public class MarcaService {
         return marcaRepository.buscarLikeMarca(marca);
     }
 
+    public Marca buscarOuCriar(String nomeMarca) {
+        return marcaRepository.findByMarca(nomeMarca)
+                .orElseGet(() -> {
+                    Marca novaMarca = new Marca();
+                    novaMarca.setMarca(nomeMarca);
+                    return marcaRepository.save(novaMarca);
+                });
+    }
 
 }
