@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -70,22 +71,47 @@ public class ProdutoService {
         for (Derivacao dReq : derivacoesEntrada) {
             if (dReq == null) continue;
 
-            tipoRoupa tr = tipoRoupaService.buscarOuCriar(
-                    dReq.getTipoRoupa() != null ? dReq.getTipoRoupa().getTipoRoupa() : null
-            );
-            tipoCor tc = tipoCorService.buscarOuCriar(
-                    dReq.getTipoCor() != null ? dReq.getTipoCor().getNomeCor() : null
-            );
-            Tamanho tm = tamanhoService.buscarOuCriar(
-                    dReq.getTamanho() != null ? dReq.getTamanho().getNomeTamanho() : null
-            );
+            // VALIDAR E RESOLVER ENTIDADES OBRIGATÓRIAS
+            if (dReq.getTipoRoupa() == null || dReq.getTipoCor() == null || dReq.getTamanho() == null) {
+                throw new IllegalArgumentException("TipoRoupa, TipoCor e Tamanho são obrigatórios para cada derivação");
+            }
 
-            // USAR MÉTODO COM PRODUTO (modelo 1:N)
+            tipoRoupa tr = tipoRoupaService.buscarOuCriar(dReq.getTipoRoupa().getTipoRoupa());
+            tipoCor tc = tipoCorService.buscarOuCriar(dReq.getTipoCor().getNomeCor());
+            Tamanho tm = tamanhoService.buscarOuCriar(dReq.getTamanho().getNomeTamanho());
+
+            // VALIDAR SE AS ENTIDADES FORAM CRIADAS CORRETAMENTE
+            if (tr == null || tc == null || tm == null) {
+                throw new IllegalArgumentException("Erro ao resolver entidades relacionadas");
+            }
+
+            // GERAR SKU AUTOMATICAMENTE SE NÃO FORNECIDO OU VAZIO
+            String skuFinal = dReq.getCodigoSKU();
+            if (skuFinal == null || skuFinal.trim().isEmpty()) {
+                skuFinal = gerarSKUAutomatico(request.getNomeProduto(), marca, tr, tc, tm);
+
+                // GARANTIR QUE O SKU FOI GERADO
+                if (skuFinal == null || skuFinal.trim().isEmpty()) {
+                    skuFinal = gerarSKUFallback();
+                }
+
+                // Verificar se SKU gerado já existe e incrementar se necessário
+                while (derivacaoRepository.findByCodigoSKU(skuFinal).isPresent()) {
+                    skuFinal = incrementarSKU(skuFinal);
+                }
+            }
+
+            // VALIDAÇÃO FINAL DO SKU
+            if (skuFinal == null || skuFinal.trim().isEmpty()) {
+                throw new IllegalArgumentException("Não foi possível gerar SKU para a derivação");
+            }
+
+            // Verificar se combinação já existe
             Optional<Derivacao> existente = derivacaoRepository
                     .findByProdutoAndTipoRoupaAndTipoCorAndTamanho(produto, tr, tc, tm);
 
             if (existente.isPresent()) {
-                // Atualiza estoque
+                // Atualiza estoque da derivação existente
                 Derivacao dx = existente.get();
                 int inc = dReq.getEstoque() == null ? 0 : dReq.getEstoque();
                 dx.setEstoque((dx.getEstoque() == null ? 0 : dx.getEstoque()) + inc);
@@ -95,18 +121,24 @@ public class ProdutoService {
                 if (dReq.getCodigoVenda() != null) dx.setCodigoVenda(dReq.getCodigoVenda());
                 derivacaoRepository.save(dx);
             } else {
-                // Cria nova variação (SKU)
+                // Cria nova variação (SKU) com validações
                 Derivacao nova = new Derivacao();
                 nova.setProduto(produto);
-                nova.setCodigoSKU(dReq.getCodigoSKU());
+                nova.setCodigoSKU(skuFinal); // SKU GARANTIDO NÃO NULO
                 nova.setCodigoVenda(dReq.getCodigoVenda());
-                nova.setPrecoCusto(dReq.getPrecoCusto());
-                nova.setPrecoVenda(dReq.getPrecoVenda());
-                nova.setMargemVenda(dReq.getMargemVenda());
-                nova.setEstoque(dReq.getEstoque());
+                nova.setPrecoCusto(dReq.getPrecoCusto() != null ? dReq.getPrecoCusto() : java.math.BigDecimal.ZERO);
+                nova.setPrecoVenda(dReq.getPrecoVenda() != null ? dReq.getPrecoVenda() : java.math.BigDecimal.ZERO);
+                nova.setMargemVenda(dReq.getMargemVenda() != null ? dReq.getMargemVenda() : java.math.BigDecimal.ZERO);
+                nova.setEstoque(dReq.getEstoque() != null ? dReq.getEstoque() : 0);
                 nova.setTipoRoupa(tr);
                 nova.setTipoCor(tc);
                 nova.setTamanho(tm);
+
+                // VALIDAÇÃO FINAL ANTES DE SALVAR
+                if (nova.getCodigoSKU() == null || nova.getCodigoSKU().trim().isEmpty()) {
+                    throw new IllegalArgumentException("SKU não pode ser nulo ao salvar derivação");
+                }
+
                 derivacaoRepository.save(nova);
             }
         }
@@ -114,6 +146,133 @@ public class ProdutoService {
         return produtoRepository.findById(produto.getIdProduto()).orElse(produto);
     }
 
+    /**
+     * Gera SKU automático com validações robustas
+     */
+    private String gerarSKUAutomatico(String nomeProduto, Marca marca,
+                                      tipoRoupa tipoRoupa, tipoCor tipoCor,
+                                      Tamanho tamanho) {
+        try {
+            // VALIDAR ENTRADAS
+            if (nomeProduto == null || marca == null || tipoRoupa == null || tipoCor == null || tamanho == null) {
+                return gerarSKUFallback();
+            }
+
+            String tipoAbrev = abreviarTexto(tipoRoupa.getTipoRoupa(), 3);
+            String marcaAbrev = abreviarTexto(marca.getMarca(), 3);
+            String corAbrev = abreviarTexto(tipoCor.getNomeCor(), 2);
+            String tamanhoAbrev = abreviarTamanho(tamanho.getNomeTamanho());
+            String sequencia = gerarSequencia(tipoAbrev, marcaAbrev, corAbrev, tamanhoAbrev);
+
+            String sku = String.format("%s-%s-%s-%s-%s",
+                            tipoAbrev, marcaAbrev, corAbrev, tamanhoAbrev, sequencia)
+                    .toUpperCase();
+
+            // VALIDAR SE SKU FOI GERADO CORRETAMENTE
+            if (sku.contains("NULL") || sku.length() < 10) {
+                return gerarSKUFallback();
+            }
+
+            return sku;
+        } catch (Exception e) {
+            return gerarSKUFallback();
+        }
+    }
+
+    /**
+     * SKU de fallback para casos de erro
+     */
+    private String gerarSKUFallback() {
+        return "AUTO-" + System.currentTimeMillis();
+    }
+
+    private String abreviarTexto(String texto, int maxChars) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return "XXX".substring(0, maxChars);
+        }
+
+        String textoLimpo = texto.replaceAll("[^a-zA-Z]", "").toUpperCase();
+        if (textoLimpo.isEmpty()) {
+            return "XXX".substring(0, maxChars);
+        }
+
+        if (textoLimpo.length() <= maxChars) {
+            return String.format("%-" + maxChars + "s", textoLimpo).replace(' ', 'X');
+        }
+
+        // Remove vogais para abreviar
+        String semVogais = textoLimpo.replaceAll("[AEIOU]", "");
+
+        if (semVogais.length() >= maxChars) {
+            return semVogais.substring(0, maxChars);
+        }
+
+        // Se ainda for pequeno, pega do texto original
+        return textoLimpo.substring(0, Math.min(maxChars, textoLimpo.length()));
+    }
+
+    private String abreviarTamanho(String tamanho) {
+        if (tamanho == null || tamanho.trim().isEmpty()) {
+            return "U";
+        }
+
+        Map<String, String> mapeamento = Map.of(
+                "PEQUENO", "P", "MÉDIO", "M", "MEDIO", "M",
+                "GRANDE", "G", "EXTRA GRANDE", "XG", "EXTRAGRANDE", "XG",
+                "EXTRA PEQUENO", "XP", "EXTRAPEQUENO", "XP"
+        );
+
+        String tamanhoUpper = tamanho.toUpperCase().trim();
+        String mapeado = mapeamento.get(tamanhoUpper);
+        if (mapeado != null) return mapeado;
+
+        if (tamanhoUpper.length() <= 2) return tamanhoUpper;
+
+        return tamanhoUpper.substring(0, Math.min(2, tamanhoUpper.length()));
+    }
+
+    private String gerarSequencia(String tipo, String marca, String cor, String tamanho) {
+        try {
+            String padrao = String.format("%s-%s-%s-%s", tipo, marca, cor, tamanho);
+            String ultimoSKU = derivacaoRepository.findLastSKUByPattern(padrao + "%");
+
+            if (ultimoSKU == null) {
+                return "001";
+            }
+
+            String[] partes = ultimoSKU.split("-");
+            if (partes.length >= 5) {
+                try {
+                    int ultimoNumero = Integer.parseInt(partes[4]);
+                    return String.format("%03d", ultimoNumero + 1);
+                } catch (NumberFormatException e) {
+                    return "001";
+                }
+            }
+
+            return "001";
+        } catch (Exception e) {
+            return "001";
+        }
+    }
+
+    private String incrementarSKU(String sku) {
+        if (sku == null) return gerarSKUFallback();
+
+        String[] partes = sku.split("-");
+        if (partes.length >= 5) {
+            try {
+                int seq = Integer.parseInt(partes[4]) + 1;
+                partes[4] = String.format("%03d", seq);
+                return String.join("-", partes);
+            } catch (NumberFormatException e) {
+                return sku + "-" + System.currentTimeMillis();
+            }
+        }
+        return sku + "-" + System.currentTimeMillis();
+    }
+
+    // Métodos auxiliares mantidos como estavam
     public List<Produto> listar() {
         return produtoRepository.findAll();
     }
@@ -131,13 +290,6 @@ public class ProdutoService {
 
     public List<Produto> buscarProdutos(String termo) {
         return produtoRepository.buscarProdutos(termo);
-    }
-
-    public List<Derivacao> listarDerivacoes(String nomeProduto) {
-        return produtoRepository.findByNomeProdutoContainingIgnoreCase(nomeProduto)
-                .stream().findFirst()
-                .map(derivacaoRepository::findByProduto)
-                .orElseGet(ArrayList::new);
     }
 
     public Optional<Produto> buscarPorSKU(String codigoSKU) {

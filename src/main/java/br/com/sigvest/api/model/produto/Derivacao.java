@@ -48,6 +48,7 @@ public class Derivacao implements Serializable {
     @Column(name = "estoque_produto", nullable = false)
     private Integer estoque;
 
+    // RELACIONAMENTO N:1 - DERIVACAO PERTENCE A UM PRODUTO
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_produto", nullable = false)
     @JsonBackReference

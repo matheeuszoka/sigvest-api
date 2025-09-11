@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("produto")
+@CrossOrigin(origins = "*")
 public class ProdutoController {
 
     @Autowired
@@ -20,9 +21,13 @@ public class ProdutoController {
     @PostMapping
     public ResponseEntity<?> salvar(@RequestBody Produto produto) {
         try {
-            return ResponseEntity.ok(produtoService.salvarProduto(produto));
+            Produto produtoSalvo = produtoService.salvarProduto(produto);
+            return ResponseEntity.ok(produtoSalvo);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro interno: " + ex.getMessage());
         }
     }
 
@@ -31,6 +36,11 @@ public class ProdutoController {
         return produtoService.listar();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
+        Optional<Produto> produto = produtoService.buscarPorId(id);
+        return produto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/sku/{sku}")
     public ResponseEntity<Produto> buscarPorSKU(@PathVariable String sku) {
@@ -38,11 +48,14 @@ public class ProdutoController {
         return produto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+//    @GetMapping("/estoque")
+//    public List<Produto> listarComEstoque() {
+//        return produtoService.listarProdutosComEstoque();
+//    }
 
-
-    @GetMapping("/{id}")
-    public Optional<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id);
+    @GetMapping("/buscar")
+    public List<Produto> buscar(@RequestParam String termo) {
+        return produtoService.buscarProdutos(termo);
     }
 
     @DeleteMapping("/{id}")
@@ -52,6 +65,17 @@ public class ProdutoController {
             return ResponseEntity.ok("Produto deletado com sucesso.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produto não encontrado.");
+        }
+    }
+
+    @PutMapping("/derivacao/{idDerivacao}/estoque")
+    public ResponseEntity<?> atualizarEstoque(
+            @PathVariable Long idDerivacao,
+            @RequestParam Integer estoque) {
+        try {
+            return ResponseEntity.ok(produtoService.atualizarEstoque(idDerivacao, estoque));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 }

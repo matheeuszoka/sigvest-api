@@ -2,6 +2,7 @@ package br.com.sigvest.api.model.produto;
 
 import br.com.sigvest.api.model.produto.Roupa.Marca;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,11 +35,31 @@ public class Produto {
     @JoinColumn(name = "id_marca", nullable = false)
     private Marca marca;
 
+    // RELACIONAMENTO 1:N - UM PRODUTO TEM VÁRIAS DERIVAÇÕES
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Derivacao> derivacoes = new ArrayList<>();
 
+    // Compatibilidade: aceita "derivacao" singular no JSON
+    @Transient
+    private Derivacao derivacaoCompat;
+
+    @JsonProperty("derivacao")
+    public void setDerivacaoCompat(Derivacao d) {
+        if (this.derivacoes == null) {
+            this.derivacoes = new ArrayList<>();
+        }
+        if (d != null) {
+            this.derivacoes.add(d);
+            this.derivacaoCompat = d;
+        }
+    }
+
+    // Método auxiliar para adicionar derivação
     public void adicionarDerivacao(Derivacao d) {
+        if (derivacoes == null) {
+            derivacoes = new ArrayList<>();
+        }
         derivacoes.add(d);
         d.setProduto(this);
     }

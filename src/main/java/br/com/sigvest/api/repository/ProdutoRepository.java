@@ -1,6 +1,5 @@
 package br.com.sigvest.api.repository;
 
-import br.com.sigvest.api.model.produto.Derivacao;
 import br.com.sigvest.api.model.produto.Produto;
 import br.com.sigvest.api.model.produto.Roupa.Marca;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,17 +11,11 @@ import java.util.Optional;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    // Produto “pai” único por nome + marca
+    // Produto "pai" único por nome + marca
     Optional<Produto> findByNomeProdutoAndMarca(String nomeProduto, Marca marca);
 
     // Busca aproximada por nome
     List<Produto> findByNomeProdutoContainingIgnoreCase(String nomeProduto);
-
-    // Encontra o produto a partir de uma derivação (no modelo 1:N a Derivacao aponta para Produto)
-    Optional<Produto> findByDerivacoesContains(Derivacao derivacao);
-
-    // Caso precise usar a forma “por derivacao” em vez de contains:
-    // Optional<Produto> findByDerivacoes_IdDerivacao(Long idDerivacao);
 
     // Consulta nativa de busca por termo (nome do produto e marca)
     @Query(value = "SELECT p.* FROM produto p " +
@@ -31,4 +24,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             "   OR m.marca LIKE CONCAT('%', :termo, '%')",
             nativeQuery = true)
     List<Produto> buscarProdutos(@Param("termo") String termo);
+
+    // Buscar produtos com estoque (via derivações)
+    @Query("SELECT DISTINCT p FROM Produto p JOIN p.derivacoes d WHERE d.estoque > 0")
+    List<Produto> findProdutosComEstoque();
+
+    // Contar derivações de um produto
+    @Query("SELECT COUNT(d) FROM Derivacao d WHERE d.produto = :produto")
+    Long countDerivacoesByProduto(@Param("produto") Produto produto);
 }

@@ -20,7 +20,7 @@ public interface DerivacaoRepository extends JpaRepository<Derivacao, Long> {
     // Buscar por código de venda único
     Optional<Derivacao> findByCodigoVenda(String codigoVenda);
 
-    // MÉTODO LEGADO - sem Produto (para compatibilidade com código antigo)
+    // MÉTODO LEGADO - sem Produto (para compatibilidade)
     @Query("SELECT d FROM Derivacao d WHERE d.tipoRoupa = :tipoRoupa AND d.tipoCor = :tipoCor AND d.tamanho = :tamanho")
     Optional<Derivacao> findByTipoRoupaAndTipoCorAndTamanho(
             @Param("tipoRoupa") tipoRoupa tipoRoupa,
@@ -36,7 +36,7 @@ public interface DerivacaoRepository extends JpaRepository<Derivacao, Long> {
     // Buscar derivações de um produto específico
     List<Derivacao> findByProduto(Produto produto);
 
-    // Listar todas as derivações de um tipo de roupa
+    // Listar derivações por tipo de roupa
     List<Derivacao> findByTipoRoupa(tipoRoupa tipoRoupa);
 
     // Buscar por tipo de roupa e cor
@@ -45,4 +45,11 @@ public interface DerivacaoRepository extends JpaRepository<Derivacao, Long> {
     // Verificar estoque por derivação
     @Query("SELECT d FROM Derivacao d WHERE d.estoque > 0")
     List<Derivacao> findByEstoqueGreaterThanZero();
+
+    // MÉTODO PARA GERAÇÃO AUTOMÁTICA DE SKU
+    @Query(value = "SELECT codigo_sku FROM derivacao_sku " +
+            "WHERE codigo_sku LIKE :pattern " +
+            "ORDER BY codigo_sku DESC LIMIT 1",
+            nativeQuery = true)
+    String findLastSKUByPattern(@Param("pattern") String pattern);
 }
