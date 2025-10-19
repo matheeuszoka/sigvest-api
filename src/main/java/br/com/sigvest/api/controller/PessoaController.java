@@ -61,16 +61,6 @@ public class PessoaController {
         }
     }
 
-    @GetMapping("/atrib/funcionario")
-    public List<Pessoa> buscarAtribFunc() {
-        return pessoaService.buscarAtribFunc();
-    }
-
-
-    @GetMapping("/atrib/cliente")
-    public List<Pessoa> buscarAtribCli() {
-        return pessoaService.buscarAtribCli();
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarPessoa(

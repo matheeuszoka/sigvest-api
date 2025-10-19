@@ -176,4 +176,7 @@ public class FornecedorService {
         return fornecedorRepository.findById(id);
     }
 
+    public List<Fornecedor>buscarLikeFornecedor(String razaoSocial){
+        return fornecedorRepository.buscarLikeFornecedor(razaoSocial);
+    }
 }

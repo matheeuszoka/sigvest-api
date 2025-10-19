@@ -1,6 +1,8 @@
 package br.com.sigvest.api.model.produto;
 
+import br.com.sigvest.api.model.compras.ItemCompras;
 import br.com.sigvest.api.model.produto.Roupa.Marca;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -21,6 +23,7 @@ import java.util.List;
                 @UniqueConstraint(name = "uk_produto_nome_marca", columnNames = {"nome_produto", "id_marca"})
         }
 )
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Produto {
 
     @Id
@@ -28,19 +31,17 @@ public class Produto {
     @Column(name = "id_produto")
     private Long idProduto;
 
-    @Column(name = "nome_produto", nullable = false)
+    @Column(name = "nome_produto", nullable = false, length = 150)
     private String nomeProduto;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_marca", nullable = false)
     private Marca marca;
 
-    // RELACIONAMENTO 1:N - UM PRODUTO TEM VÁRIAS DERIVAÇÕES
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "produto", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Derivacao> derivacoes = new ArrayList<>();
 
-    // Compatibilidade: aceita "derivacao" singular no JSON
+    //
     @Transient
     private Derivacao derivacaoCompat;
 
@@ -55,7 +56,6 @@ public class Produto {
         }
     }
 
-    // Método auxiliar para adicionar derivação
     public void adicionarDerivacao(Derivacao d) {
         if (derivacoes == null) {
             derivacoes = new ArrayList<>();

@@ -20,6 +20,9 @@ public interface DerivacaoRepository extends JpaRepository<Derivacao, Long> {
     // Buscar por código de venda único
     Optional<Derivacao> findByCodigoVenda(String codigoVenda);
 
+    List<Derivacao> findByProdutoIdProduto(Long idProduto);
+
+
     // MÉTODO LEGADO - sem Produto (para compatibilidade)
     @Query("SELECT d FROM Derivacao d WHERE d.tipoRoupa = :tipoRoupa AND d.tipoCor = :tipoCor AND d.tamanho = :tamanho")
     Optional<Derivacao> findByTipoRoupaAndTipoCorAndTamanho(

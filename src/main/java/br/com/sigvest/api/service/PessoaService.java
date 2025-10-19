@@ -110,13 +110,6 @@ public class PessoaService {
         return pessoaRepository.buscarLikeNome(nomeCompleto);
     }
 
-    public List<Pessoa> buscarAtribFunc() {
-        return pessoaRepository.buscarAtribFunc();
-    }
-
-    public List<Pessoa> buscarAtribCli() {
-        return pessoaRepository.buscarAtribCli();
-    }
 
     public boolean deletar(Long id) {
         Optional<Pessoa> pessoaOptional = pessoaRepository.findById(id);

@@ -1,7 +1,10 @@
 package br.com.sigvest.api.controller;
 
+import br.com.sigvest.api.model.produto.Derivacao;
 import br.com.sigvest.api.model.produto.Produto;
+import br.com.sigvest.api.model.produto.Roupa.tipoRoupa;
 import br.com.sigvest.api.service.ProdutoService;
+import br.com.sigvest.api.service.RoupaSKUService.TipoRoupaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,8 @@ public class ProdutoController {
 
     @Autowired
     private ProdutoService produtoService;
+
+
 
     @PostMapping
     public ResponseEntity<?> salvar(@RequestBody Produto produto) {
@@ -47,6 +52,21 @@ public class ProdutoController {
         Optional<Produto> produto = produtoService.buscarPorSKU(sku);
         return produto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/derivacao/produto/{idProduto}")
+    public ResponseEntity<List<Derivacao>> buscarDerivacoesPorProduto(@PathVariable Long idProduto) {
+        List<Derivacao> derivacoes = produtoService.buscarDerivacoesPorProduto(idProduto);
+        if (derivacoes == null || derivacoes.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(derivacoes);
+    }
+
+    @GetMapping("/buscar/produtos-marcas")
+    public List<String>BuscartodosMarcaProduto(){
+        return produtoService.findAllporprodutomarca();
+    }
+
 
 //    @GetMapping("/estoque")
 //    public List<Produto> listarComEstoque() {

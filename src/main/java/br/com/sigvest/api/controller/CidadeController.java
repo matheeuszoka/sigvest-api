@@ -18,13 +18,14 @@ public class CidadeController {
     public List<Cidade> listar() {
         return cidadeService.listar();
     }
+
     @PostMapping
     public Cidade setCidade(@RequestBody Cidade cidade) {
         return cidadeService.salvar(cidade);
     }
 
     @GetMapping("/likecidade/{nomeCidade}")
-    public List<Cidade> buscarLikeCidade(@PathVariable String nomeCidade){
+    public List<Cidade> buscarLikeCidade(@PathVariable String nomeCidade) {
         return cidadeService.buscarLikeCidade(nomeCidade);
     }
 

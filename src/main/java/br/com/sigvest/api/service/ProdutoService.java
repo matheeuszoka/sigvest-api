@@ -67,6 +67,8 @@ public class ProdutoService {
                     return produtoRepository.save(p);
                 });
 
+
+
         // Processar cada variação (Derivacao) para este Produto
         for (Derivacao dReq : derivacoesEntrada) {
             if (dReq == null) continue;
@@ -146,6 +148,10 @@ public class ProdutoService {
         return produtoRepository.findById(produto.getIdProduto()).orElse(produto);
     }
 
+
+    public List<Derivacao> buscarDerivacoesPorProduto(Long idProduto) {
+        return derivacaoRepository.findByProdutoIdProduto(idProduto);
+    }
     /**
      * Gera SKU automático com validações robustas
      */
@@ -274,11 +280,11 @@ public class ProdutoService {
 
     // Métodos auxiliares mantidos como estavam
     public List<Produto> listar() {
-        return produtoRepository.findAll();
+        return produtoRepository.findAllComDerivacoes();
     }
 
     public Optional<Produto> buscarPorId(Long id) {
-        return produtoRepository.findById(id);
+        return produtoRepository.findByIdComDerivacoes(id);
     }
 
     public boolean deletar(Long id) {
@@ -302,5 +308,9 @@ public class ProdutoService {
                 .orElseThrow(() -> new IllegalArgumentException("Derivação não encontrada"));
         d.setEstoque(novoEstoque);
         return derivacaoRepository.save(d);
+    }
+
+    public List<String>findAllporprodutomarca(){
+        return produtoRepository.findAllProdutosComMarca();
     }
 }

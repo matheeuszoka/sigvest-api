@@ -2,6 +2,7 @@ package br.com.sigvest.api.model.fornecedor;
 
 import br.com.sigvest.api.model.endereco.Endereco;
 import br.com.sigvest.api.model.extras.Tipo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +12,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class Fornecedor {
 
     @Id
