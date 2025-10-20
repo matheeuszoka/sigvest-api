@@ -166,27 +166,39 @@ public class CompraService {
      * Cria a movimentação financeira a partir dos dados da compra.
      * Conversão simplificada de datas.
      */
+    // Dentro de CompraService
     private MovimentarFinanceiro criarMovimentacaoFinanceira(Compra compra) {
+        // Garante instância
         MovimentarFinanceiro mov = compra.getMovimentarFinanceiro();
+        if (mov == null) {
+            mov = new MovimentarFinanceiro();
+        }
 
-        // Configurar valores calculados
-        mov.setValor(compra.getTotalCompra());
-
-        // Converter datas de forma simplificada
-        mov.setDataLancamento(converterLocalDateParaDate(compra.getDataCompra()));
-
-        // Configurar tipos e status padrão
+        // Tipos e status padrão
         mov.setTipoFinanceiro(TipoFinanceiro.DESPESA);
         mov.setStatus(StatusFinanceiro.PENDENTE);
 
-        // Criar descrição automática
-        String descricao = String.format("Compra - Nota: %s - Fornecedor: %s",
-                compra.getNumeroNota(),
-                compra.getFornecedor() != null ? compra.getFornecedor().getRazaoSocial() : "N/A");
+        // Valores e datas
+        mov.setValor(compra.getTotalCompra());
+        mov.setDataLancamento(converterLocalDateParaDate(compra.getDataCompra()));
+
+        // Descrição automática
+        String descricao = String.format(
+                "Compra - Nota: %s",
+                compra.getNumeroNota());
         mov.setDescricao(descricao);
+
+        // Vincula as pontas do OneToOne
+        mov.setCompra(compra);
+        compra.setMovimentarFinanceiro(mov);
+
+        // Persistência explícita para garantir gravação da descrição mesmo sem cascade
+        // Caso seu MovimentarFinanService use outro nome (ex.: save), ajuste aqui.
+        mov = movimentarFinanService.salvar(mov);
 
         return mov;
     }
+
 
     /**
      * Converte LocalDate para Date usando meio-dia UTC para evitar problemas de fuso horário.
@@ -277,7 +289,14 @@ public class CompraService {
         Compra compra = compraRepository.findByIdComDetalhes(request.getIdCompra())
                 .orElseThrow(() -> new IllegalArgumentException("Compra não encontrada com ID: " + request.getIdCompra()));
 
-        // ... (código que processa itens e cancela o financeiro) ...
+// Dentro de estornarCompra, após ajustar itens e status da compra:
+        MovimentarFinanceiro mov = compra.getMovimentarFinanceiro();
+        if (mov != null && "total".equalsIgnoreCase(request.getTipoEstorno())) {
+            mov.setStatus(StatusFinanceiro.CANCELADO);
+            mov.setDataPagamento(new Date());
+        }
+// Persista as alterações conforme seu mapeamento (ex.: salvar a compra que referencia o mov)
+        compraRepository.save(compra);
 
         // 2. Processar itens (ajuste de estoque e ItemCompras)
         for (EstornoCompraRequest.ItemEstornoDTO itemEstorno : request.getItensEstorno()) {
